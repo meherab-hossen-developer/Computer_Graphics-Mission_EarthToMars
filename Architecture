@@ -1,0 +1,251 @@
+Project Architecture: main.cpp
+
+This file lists all functions in the project and what each one does.
+Order follows the source file.
+
+1) Smoke and Utility Rendering
+
+- initSmoke()
+  Initializes the smoke particle pool by marking all particles inactive.
+
+- spawnSmoke(float x, float y, float z)
+  Activates one free smoke particle near the given location with random velocity/size/alpha.
+
+- updateSmoke()
+  Advances active smoke particles over time (movement, growth, fade-out, deactivation).
+
+- drawSmoke()
+  Renders all active smoke particles as blended translucent spheres.
+
+- drawBresenhamLine(int x1, int y1, int x2, int y2)
+  Draws a 2D line using Bresenham's algorithm via GL points.
+
+- plotCirclePoints(int xc, int yc, int x, int y)
+  Plots 8-way symmetric points for midpoint-circle drawing.
+
+- drawMidpointCircle(int xc, int yc, int radius)
+  Draws a circle perimeter using midpoint circle algorithm.
+
+- drawMidpointCircleFilled(int xc, int yc, int radius)
+  Draws a filled circle by repeatedly drawing midpoint-circle rings.
+
+- drawSunMidpoint(int centerX, int centerY, float visibility)
+  Draws stylized 2D sun rays and glow rings on the background UI projection.
+
+- drawRocketTrail()
+  Draws a layered white/gray 2D ascent trail behind the rocket during LAUNCHING.
+
+2) Planet Rendering
+
+- drawEarth()
+  Draws procedural Earth sphere (ocean/land shading + cloud shell) during CRUISING_TO_MARS.
+  Earth now rotates with tilt/spin transform.
+
+- loadMarsBMP(const char *filename, bool &ok)
+  Loads a 24-bit uncompressed BMP into an OpenGL texture and returns texture ID.
+
+- setProceduralMarsColor(float nx, float ny, float nz)
+  Computes fallback Mars-like color (bands, crater noise, canyon-like dark region, polar brightening).
+
+- drawMarsSphere(float r, int slices, int stacks)
+  Draws high-resolution Mars sphere with texture if available, otherwise procedural fallback color.
+
+- drawMars()
+  Renders rotating rounded Mars planet during CRUISING_TO_MARS.
+
+- drawStars()
+  Renders random star field points in space during CRUISING_TO_MARS.
+
+3) Sky and Terrain Systems
+
+- drawSkyBackground()
+  Draws the background sky gradient/sun depending on mission state and altitude.
+
+Earth terrain helpers:
+- earthHash2(float x, float y)
+  Hash/noise primitive for Earth terrain.
+
+- earthValueNoise(float x, float y)
+  Bilinear-smoothed value noise sample.
+
+- earthFbm(float x, float y)
+  Multi-octave fractal noise for terrain variation.
+
+- earthGroundHeight(float x, float z)
+  Height function for Earth ground undulation.
+
+- earthCrackMask(float x, float z)
+  Crack intensity mask to darken dry cracked areas.
+
+- drawEarthGroundSkyGradient()
+  Draws Earth-ground scene sky gradient plane.
+
+- drawEarthGroundCloudBands()
+  Draws translucent cloud layers.
+
+- drawEarthGroundMountainsDetailed()
+  Draws stylized mountain ranges for Earth terrain scene.
+
+- drawEarthGroundDetailed(int size, int step)
+  Draws detailed Earth ground mesh with cracks/noise color modulation.
+
+- drawEarthGroundRocks(const std::vector<EarthRock> &group)
+  Draws one Earth rock group (far/mid/near).
+
+- drawEarthGroundTwigs()
+  Draws twig/debris line segments on Earth ground.
+
+- initEarthGroundScatter()
+  Generates random Earth rock/twig scatter datasets.
+
+Mars terrain helpers:
+- marsHash2(float x, float y)
+  Hash/noise primitive for Mars terrain.
+
+- marsNoise2(float x, float y)
+  Bilinear-smoothed value noise sample.
+
+- marsFbm(float x, float y)
+  Multi-octave fractal noise for Mars terrain variation.
+
+- marsTerrainHeight(float x, float z)
+  Height function for Mars terrain.
+
+- drawMarsGroundSky()
+  Draws Mars atmospheric color backdrop.
+
+- drawMarsGroundMountains()
+  Draws layered Mars mountain ridges.
+
+- drawMarsGroundDetailed(int size, int step)
+  Draws Mars ground mesh with red/orange palette and erosion lines.
+
+- drawMarsGroundRocks()
+  Draws all Mars rocks.
+
+- initMarsGroundRocks()
+  Randomly generates Mars rock field and per-rock scale/rotation/tone.
+
+- setupMarsGroundFog()
+  Enables and configures Mars fog color/range.
+
+- drawGround()
+  Central ground router:
+  - ARRIVED_MARS: draws Mars sky/mountains/terrain/rocks and fog.
+  - Other visible states: draws Earth terrain package.
+
+4) Launch Site and Spacecraft Geometry
+
+- drawLaunchPad()
+  Draws launch pad structure (petals, center platform, mount) for non-space/non-Mars states.
+
+- drawLaunchTower()
+  Draws service tower and arm near rocket while still on launch site.
+
+- drawDispatchInstruments()
+  Draws mission control/dispatch instrument props near launch site.
+
+- drawShuttleOrbiter()
+  Draws main rocket body; positions it by state:
+  - launch stack position,
+  - transfer trajectory in space,
+  - Mars landing position anchored to terrain.
+
+- drawSolidRocketBoosters()
+  Draws side boosters while attached and applicable to state.
+
+- drawExternalTank()
+  Draws external tank while attached and applicable to state.
+
+- drawMainEngineFlames()
+  Draws main engine flame triangles during launch.
+
+- drawSRBFlames()
+  Draws booster flame triangles during launch before booster separation.
+
+- drawLadder(float x, float bottomY, float topY, float z)
+  Draws a ladder model from rails + rungs.
+
+- drawRocketLadders()
+  Draws launch ladder when astronaut is still boarding phase.
+
+- drawAstronaut()
+  Draws astronaut model and adjusts Mars draw height to terrain when outside rocket.
+
+5) Splash Screen and UI
+
+- drawBitmapText(const char *text, float x, float y, void *font)
+  Draws text via GLUT bitmap font at 2D position.
+
+- getTextWidth(const char *text, void *font)
+  Computes pixel width of bitmap text.
+
+- drawCenteredText(const char *text, float y, void *font)
+  Draws centered text line on splash/UI.
+
+- drawSplashScreen()
+  Draws initial splash/intro screen and controls.
+
+- drawButton(Button *btn)
+  Draws interactive button with hover color effect.
+
+- drawStatusText()
+  Draws mission status/altitude/instruction overlay text.
+
+6) Effects and Mars End Scene Props
+
+- drawExplosion(float x, float y, float z)
+  Draws animated mission-failure explosion visuals.
+
+- drawMarsDust()
+  Draws landing dust clouds after Mars touchdown.
+
+- drawBangladeshFlag()
+  Draws planted Bangladesh flag on Mars terrain after planting completes.
+
+7) Main Render and Input/State Loop
+
+- display()
+  Main render function. Sets projection/camera by state, applies lighting/fog choices,
+  then draws environment, vehicle, effects, UI, and buttons.
+
+- isMouseOverButton(Button *btn, int mouseX, int mouseY)
+  Hit-test utility for button clicks/hover.
+
+- mouse(int button, int state, int x, int y)
+  Handles click actions (launch, separation controls, reset) and mission state changes.
+
+- mouseMotion(int x, int y)
+  Updates button hover states.
+
+- keyboard(unsigned char key, int x, int y)
+  Handles key controls (ESC exit, leave splash screen).
+
+- timer(int value)
+  Per-frame simulation update:
+  - updates animation clocks (earth/mars rotation, exhaust/smoke)
+  - updates mission state machine (launch, cruise, Mars arrival/landing, astronaut walk, flag planting)
+  - triggers particle updates and next frame timer.
+
+8) Window/GL Setup
+
+- reshape(int w, int h)
+  Updates viewport and projection matrix on window resize.
+
+- init()
+  Initializes random seed, OpenGL state/light, textures, particles, Earth/Mars scatter data.
+
+- main(int argc, char **argv)
+  Application entry point: creates GLUT window, registers callbacks, prints controls, starts main loop.
+
+
+Main File Functionality (Step-by-Step, Short)
+
+1. Program starts in main(), initializes GLUT window/context, then calls init().
+2. init() configures OpenGL/light, loads Mars texture if available, and prebuilds particle/terrain scatter data.
+3. Application enters GLUT event loop (glutMainLoop).
+4. display() renders each frame according to mission state:
+   splash -> launch scene -> space cruise -> Mars landing scene.
+5. timer() advances all simulation states and animations every ~16ms.
+6. mouse()/keyboard() accept user actions (launch, staging, reset, splash continue, exit).
+7. On Mars end phase, astronaut descends, walks, plants flag; final flag appears on terrain.
