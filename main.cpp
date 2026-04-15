@@ -101,6 +101,9 @@ Button returnButton = {300, 50, 250, 70, "RESET MISSION", 0.8f, 0.3f, 0.0f, fals
 Button boosterButton = {40, 50, 300, 70, "SEPARATE BOOSTERS", 0.2f, 0.4f, 0.9f, false};
 Button tankButton = {460, 50, 300, 70, "SEPARATE TANK", 0.9f, 0.5f, 0.1f, false};
 
+const int UI_WIDTH = 800;
+const int UI_HEIGHT = 600;
+
 // ============================= Utility and Drawing ============================
 void initSmoke()
 {
@@ -2376,9 +2379,18 @@ void display()
 // ========================== Event Handlers ===============================
 bool isMouseOverButton(Button *btn, int mouseX, int mouseY)
 {
-    mouseY = 600 - mouseY;
-    return (mouseX >= btn->x && mouseX <= btn->x + btn->width &&
-            mouseY >= btn->y && mouseY <= btn->y + btn->height);
+    int windowWidth = glutGet(GLUT_WINDOW_WIDTH);
+    int windowHeight = glutGet(GLUT_WINDOW_HEIGHT);
+    if (windowWidth <= 0)
+        windowWidth = UI_WIDTH;
+    if (windowHeight <= 0)
+        windowHeight = UI_HEIGHT;
+
+    float uiMouseX = (float)mouseX * (float)UI_WIDTH / (float)windowWidth;
+    float uiMouseY = (float)(windowHeight - mouseY) * (float)UI_HEIGHT / (float)windowHeight;
+
+    return (uiMouseX >= btn->x && uiMouseX <= btn->x + btn->width &&
+            uiMouseY >= btn->y && uiMouseY <= btn->y + btn->height);
 }
 
 void mouse(int button, int state, int x, int y)
